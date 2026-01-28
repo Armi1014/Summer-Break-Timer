@@ -501,6 +501,9 @@ body {
 
 @media (max-width: 720px) {
   body {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
     padding: 20px 14px 28px;
   }
 
