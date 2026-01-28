@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nyári szünet visszaszámláló</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="sky">
+      <div class="sun"></div>
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+      <div class="bird bird-1"></div>
+      <div class="bird bird-2"></div>
+    </div>
+
+    <main class="wrap">
+      <section class="hero">
+        <div class="hero-top">
+          <div class="badge" id="badge">Magyar tanév 2025/2026</div>
+          <div class="lang-switch" role="group" aria-label="Nyelv / Language">
+            <button
+              class="lang-btn is-active"
+              type="button"
+              data-lang="hu"
+              aria-label="Magyar"
+              title="Magyar"
+            >
+              <span class="flag flag-hu" aria-hidden="true"></span>
+            </button>
+            <button
+              class="lang-btn"
+              type="button"
+              data-lang="en"
+              aria-label="English (US)"
+              title="English (US)"
+            >
+              <span class="flag flag-us" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <h1 id="headline">Nyári szünet visszaszámláló</h1>
+        <p id="intro">
+          Színes, pontos és Budapest-időre hangolt visszaszámlálás a magyar iskolák
+          nyári szünetéig.
+        </p>
+        <div class="meta">
+          <div class="meta-card">
+            <span class="meta-label" id="lastTeachingLabel">Utolsó tanítási nap</span>
+            <strong id="lastTeachingDay">--</strong>
+          </div>
+          <div class="meta-card highlight">
+            <span class="meta-label" id="summerBreakLabel">Nyári szünet kezdete</span>
+            <strong id="summerBreakStart">--</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="countdown-card">
+        <div class="countdown-grid" aria-live="polite">
+          <div class="unit">
+            <span class="value" id="days">0</span>
+            <span class="label" id="daysLabel">nap</span>
+          </div>
+          <div class="unit">
+            <span class="value" id="hours">00</span>
+            <span class="label" id="hoursLabel">óra</span>
+          </div>
+          <div class="unit">
+            <span class="value" id="minutes">00</span>
+            <span class="label" id="minutesLabel">perc</span>
+          </div>
+          <div class="unit">
+            <span class="value" id="seconds">00</span>
+            <span class="label" id="secondsLabel">másodperc</span>
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <span id="progressFill"></span>
+          </div>
+          <div class="progress-meta">
+            <span id="progressText">Tanév haladása: --%</span>
+            <span id="budapestClock">Budapest idő: --:--</span>
+          </div>
+        </div>
+
+        <div class="status" id="status">Minden nap közelebb a nyárhoz.</div>
+      </section>
+
+      <section class="note">
+        <div class="flag-line" aria-hidden="true"></div>
+        <p id="note">
+          Az időpontok a 2025/2026-os tanév hivatalos rendje alapján vannak beállítva.
+          A visszaszámlálás a budapesti időzónát használja. Forrás: 27/2025. (VII. 24.)
+          BM rendelet.
+        </p>
+      </section>
+    </main>
+
+    <div class="waves" aria-hidden="true">
+      <span class="wave wave-1"></span>
+      <span class="wave wave-2"></span>
+      <span class="wave wave-3"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
