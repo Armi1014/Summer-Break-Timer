@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hu">
+<html lang="hu" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,24 +26,46 @@
       <section class="hero">
         <div class="hero-top">
           <div class="badge" id="badge">Magyar tanév 2025/2026</div>
-          <div class="lang-switch" role="group" aria-label="Nyelv / Language">
+          <div class="controls">
+            <div class="lang-switch" role="group" aria-label="Nyelv / Language">
+              <button
+                class="lang-btn is-active"
+                type="button"
+                data-lang="hu"
+                aria-label="Magyar"
+                title="Magyar"
+              >
+                <span class="flag flag-hu" aria-hidden="true"></span>
+              </button>
+              <button
+                class="lang-btn"
+                type="button"
+                data-lang="en"
+                aria-label="English (US)"
+                title="English (US)"
+              >
+                <span class="flag flag-us" aria-hidden="true"></span>
+              </button>
+            </div>
             <button
-              class="lang-btn is-active"
+              class="theme-toggle"
+              id="themeToggle"
               type="button"
-              data-lang="hu"
-              aria-label="Magyar"
-              title="Magyar"
+              aria-label="Sötét mód bekapcsolása"
+              title="Sötét mód bekapcsolása"
+              aria-pressed="false"
             >
-              <span class="flag flag-hu" aria-hidden="true"></span>
-            </button>
-            <button
-              class="lang-btn"
-              type="button"
-              data-lang="en"
-              aria-label="English (US)"
-              title="English (US)"
-            >
-              <span class="flag flag-us" aria-hidden="true"></span>
+              <span class="theme-icon" aria-hidden="true">
+                <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path
+                    d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"
+                  ></path>
+                </svg>
+                <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21 14.2A8.5 8.5 0 1 1 9.8 3a7 7 0 0 0 11.2 11.2Z"></path>
+                </svg>
+              </span>
             </button>
           </div>
         </div>

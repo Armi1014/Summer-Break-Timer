@@ -53,6 +53,7 @@ const elements = {
   status: document.getElementById("status"),
   note: document.getElementById("note"),
   languageButtons: document.querySelectorAll("[data-lang]"),
+  themeToggle: document.getElementById("themeToggle"),
 };
 
 const prefersReducedMotion =
@@ -84,6 +85,21 @@ const translations = {
     budapestTimeLabel: "Budapest idő: {time}",
     statusDefault: "Minden nap közelebb a nyárhoz.",
     statusDone: "Itt a nyár! Jó pihenést!",
+    weekendWish: "Kellemes hétvégét!",
+    quotes: [
+      "Ma is tettél valamit, ami közelebb visz a céljaidhoz.",
+      "Egy apró lépés ma, nagy lendület holnap.",
+      "A kitartásod építi a nyarad emlékeit.",
+      "Minden nap egy új esély a fejlődésre.",
+      "A pihenés akkor a legédesebb, ha megdolgoztál érte.",
+      "Légy büszke magadra: haladsz.",
+      "A nap fénye ma is veled van.",
+      "Tarts ki, a legjobb pillanatok úton vannak.",
+      "A türelem ma is meghozza a gyümölcsét.",
+      "Csak így tovább: jó úton jársz.",
+    ],
+    themeToggleDark: "Sötét mód bekapcsolása",
+    themeToggleLight: "Világos mód bekapcsolása",
     note:
       "Az időpontok a 2025/2026-os tanév hivatalos rendje alapján vannak beállítva. A visszaszámlálás a budapesti időzónát használja. Forrás: 27/2025. (VII. 24.) BM rendelet.",
   },
@@ -105,12 +121,28 @@ const translations = {
     budapestTimeLabel: "Budapest time: {time}",
     statusDefault: "Every day closer to summer.",
     statusDone: "Summer is here! Enjoy your break!",
+    weekendWish: "Have a great weekend!",
+    quotes: [
+      "A small step today sets up a brighter tomorrow.",
+      "Your effort today is future relaxation.",
+      "Keep going — the finish line is closer than you think.",
+      "Progress is progress, no matter the size.",
+      "Stay steady; great days are on the way.",
+      "You’re building something good, one day at a time.",
+      "Show up today, thank yourself tomorrow.",
+      "Momentum grows with every little win.",
+      "Your consistency is your superpower.",
+      "You’ve got this. Keep the pace.",
+    ],
+    themeToggleDark: "Switch to dark mode",
+    themeToggleLight: "Switch to light mode",
     note:
       "Dates follow the official 2025/2026 Hungarian school year schedule. The countdown uses the Budapest time zone. Source: 27/2025. (VII. 24.) BM decree.",
   },
 };
 
 let currentLanguage = "hu";
+let currentTheme = "light";
 
 function getFormatter(locale, options) {
   const key = JSON.stringify({ locale, options });
@@ -175,6 +207,55 @@ function formatTemplate(template, values) {
   );
 }
 
+function getDateKeyForZone(zone) {
+  const parts = getFormatter("en-GB", {
+    timeZone: zone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = {};
+  for (const part of parts) {
+    if (part.type !== "literal") {
+      values[part.type] = part.value;
+    }
+  }
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getDailyQuote(t) {
+  const quotes = Array.isArray(t.quotes) ? t.quotes : [];
+  if (!quotes.length) return t.statusDefault;
+  const key = getDateKeyForZone(timeZone);
+  let hash = 0;
+  for (const char of key) {
+    hash = (hash + char.charCodeAt(0)) % 100000;
+  }
+  return quotes[hash % quotes.length];
+}
+
+function isWeekendInZone(zone) {
+  const weekday = getFormatter("en-GB", { timeZone: zone, weekday: "short" }).format(new Date());
+  return weekday === "Sat" || weekday === "Sun";
+}
+
+function updateThemeToggleLabel() {
+  if (!elements.themeToggle) return;
+  const t = translations[currentLanguage];
+  const label = currentTheme === "dark" ? t.themeToggleLight : t.themeToggleDark;
+  elements.themeToggle.setAttribute("aria-label", label);
+  elements.themeToggle.setAttribute("title", label);
+  elements.themeToggle.setAttribute("aria-pressed", currentTheme === "dark" ? "true" : "false");
+}
+
+function applyTheme(theme, persist = true) {
+  currentTheme = theme === "dark" ? "dark" : "light";
+  elements.root.dataset.theme = currentTheme;
+  updateThemeToggleLabel();
+  if (persist) {
+    localStorage.setItem("theme", currentTheme);
+  }
+}
 
 function runIntroAnimations() {
   if (!canAnimate) return;
@@ -272,6 +353,7 @@ function setLanguage(lang, persist = true) {
 
   updateDateTexts();
   updateCountdown();
+  updateThemeToggleLabel();
 
   if (persist) {
     localStorage.setItem("language", lang);
@@ -355,7 +437,9 @@ function updateCountdown() {
   }).format(new Date());
 
   elements.budapestClock.textContent = formatTemplate(t.budapestTimeLabel, { time: clock });
-  elements.status.textContent = t.statusDefault;
+  elements.status.textContent = isWeekendInZone(timeZone)
+    ? t.weekendWish
+    : getDailyQuote(t);
 }
 
 elements.languageButtons.forEach((button) => {
@@ -363,6 +447,17 @@ elements.languageButtons.forEach((button) => {
     setLanguage(button.dataset.lang);
   });
 });
+
+if (elements.themeToggle) {
+  elements.themeToggle.addEventListener("click", () => {
+    applyTheme(currentTheme === "dark" ? "light" : "dark");
+  });
+}
+
+const savedTheme = localStorage.getItem("theme");
+const prefersDark =
+  window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+applyTheme(savedTheme || (prefersDark ? "dark" : "light"), false);
 
 const savedLanguage = localStorage.getItem("language");
 setLanguage(savedLanguage || "hu", false);

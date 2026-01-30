@@ -8,7 +8,10 @@
   --sea-3: #16697a;
   --sand-1: #ffe1a8;
   --sand-2: #f6b26b;
-  --sun: #ffcf4a;
+  --sun-halo: #fff7c2;
+  --sun-core: #ffcf4a;
+  --sun-edge: #f7a93a;
+  --sun-glow: rgba(255, 207, 74, 0.7);
   --coral: #ff6b5f;
   --leaf: #2f8f4e;
   --ink: #102331;
@@ -22,6 +25,64 @@
   --status-text: #b3472d;
   --shadow: 0 25px 70px rgba(16, 35, 49, 0.18);
   --countdown-font: "Atkinson Hyperlegible", "Space Grotesk", sans-serif;
+  --badge-text: #16697a;
+  --body-glow: rgba(255, 255, 255, 0.95);
+  --body-glow-fade: rgba(255, 255, 255, 0);
+  --cloud: rgba(255, 255, 255, 0.85);
+  --cloud-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  --bird: rgba(16, 35, 49, 0.55);
+  --bird-soft: rgba(16, 35, 49, 0.45);
+  --unit-1: rgba(255, 255, 255, 0.9);
+  --unit-2: rgba(255, 255, 255, 0.65);
+  --unit-border: rgba(255, 255, 255, 0.75);
+  --progress-track: rgba(16, 35, 49, 0.08);
+  --flag-border: rgba(16, 35, 49, 0.2);
+  --toggle-bg: rgba(255, 255, 255, 0.75);
+  --toggle-border: rgba(255, 255, 255, 0.9);
+  --toggle-shadow: 0 12px 24px rgba(16, 35, 49, 0.16);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sky-1: #1c2d4f;
+  --sky-2: #0f1a36;
+  --sky-3: #0a1226;
+  --sea-1: #0f546e;
+  --sea-2: #0a4056;
+  --sea-3: #072f40;
+  --sand-1: #1b2130;
+  --sand-2: #283044;
+  --sun-halo: #f6f2d2;
+  --sun-core: #e5dfb8;
+  --sun-edge: #cfc79f;
+  --sun-glow: rgba(208, 204, 182, 0.5);
+  --coral: #ff8b7a;
+  --leaf: #5ad47b;
+  --ink: #e8f1ff;
+  --ink-soft: #c4d2e2;
+  --ink-muted: #a4b7ca;
+  --label: #9ab0c4;
+  --card: rgba(10, 18, 30, 0.78);
+  --panel-soft: rgba(16, 26, 40, 0.78);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --status-bg: rgba(18, 30, 44, 0.85);
+  --status-text: #ffd6a3;
+  --shadow: 0 25px 70px rgba(3, 7, 12, 0.6);
+  --badge-text: #9cd7f0;
+  --body-glow: rgba(64, 86, 120, 0.35);
+  --body-glow-fade: rgba(10, 18, 30, 0);
+  --cloud: rgba(255, 255, 255, 0.16);
+  --cloud-shadow: 0 12px 28px rgba(2, 6, 12, 0.4);
+  --bird: rgba(222, 234, 255, 0.55);
+  --bird-soft: rgba(222, 234, 255, 0.4);
+  --unit-1: rgba(20, 30, 46, 0.92);
+  --unit-2: rgba(14, 24, 38, 0.78);
+  --unit-border: rgba(255, 255, 255, 0.12);
+  --progress-track: rgba(255, 255, 255, 0.18);
+  --flag-border: rgba(255, 255, 255, 0.2);
+  --toggle-bg: rgba(12, 22, 35, 0.85);
+  --toggle-border: rgba(255, 255, 255, 0.14);
+  --toggle-shadow: 0 12px 24px rgba(2, 6, 12, 0.55);
 }
 
 * {
@@ -31,10 +92,12 @@
 body {
   margin: 0;
   height: auto;
+  min-height: 100vh;
   min-height: 100svh;
+  min-height: 100dvh;
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
   color: var(--ink);
-  background: radial-gradient(circle at 18% 20%, #ffffff 0%, #ffffff00 32%),
+  background: radial-gradient(circle at 18% 20%, var(--body-glow) 0%, var(--body-glow-fade) 32%),
     linear-gradient(160deg, var(--sky-1) 0%, var(--sky-2) 45%, var(--sky-3) 100%);
   display: flex;
   align-items: center;
@@ -44,6 +107,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  transition: background 0.7s ease, color 0.5s ease;
 }
 
 .sky {
@@ -58,21 +122,26 @@ body {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #fff7c2 0%, var(--sun) 55%, #f7a93a 100%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--sun-halo) 0%,
+    var(--sun-core) 55%,
+    var(--sun-edge) 100%
+  );
   top: -40px;
   right: -30px;
-  box-shadow: 0 0 50px rgba(255, 207, 74, 0.7);
+  box-shadow: 0 0 50px var(--sun-glow);
   animation: pulse 7s ease-in-out infinite;
 }
 
 .cloud {
   position: absolute;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--cloud);
   border-radius: 999px;
   width: 170px;
   height: 60px;
   filter: blur(0.2px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--cloud-shadow);
   animation: float 30s linear infinite;
 }
 
@@ -124,7 +193,7 @@ body {
   position: absolute;
   width: 30px;
   height: 16px;
-  border-top: 3px solid rgba(16, 35, 49, 0.55);
+  border-top: 3px solid var(--bird);
   border-radius: 50% 50% 0 0;
   transform: rotate(-6deg);
   animation: soar 12s ease-in-out infinite;
@@ -137,7 +206,7 @@ body {
   top: -3px;
   width: 30px;
   height: 16px;
-  border-top: 3px solid rgba(16, 35, 49, 0.45);
+  border-top: 3px solid var(--bird-soft);
   border-radius: 50% 50% 0 0;
   transform: rotate(8deg);
 }
@@ -170,6 +239,7 @@ body {
   backdrop-filter: blur(12px);
   display: grid;
   gap: 18px;
+  transition: background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .hero-top {
@@ -180,14 +250,23 @@ body {
   flex-wrap: wrap;
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .lang-switch {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  background: var(--panel-soft);
+  box-shadow: inset 0 0 0 1px var(--panel-border);
+  transition: background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .lang-btn {
@@ -215,9 +294,10 @@ body {
   height: 26px;
   border-radius: 4px;
   box-shadow: 0 8px 16px rgba(16, 35, 49, 0.18);
-  border: 1px solid rgba(16, 35, 49, 0.2);
+  border: 1px solid var(--flag-border);
   position: relative;
   overflow: hidden;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .flag-hu {
@@ -246,19 +326,85 @@ body {
   background-size: 6px 6px;
 }
 
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--toggle-border);
+  background: var(--toggle-bg);
+  color: var(--ink);
+  box-shadow: var(--toggle-shadow);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.6s ease, border-color 0.6s ease,
+    box-shadow 0.6s ease, color 0.6s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #2f8f4e;
+  outline-offset: 2px;
+}
+
+.theme-icon {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 0.45s ease, transform 0.55s ease;
+}
+
+.icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.icon-moon {
+  opacity: 0;
+  transform: rotate(-60deg) scale(0.6);
+  fill: currentColor;
+  stroke: none;
+}
+
+:root[data-theme="dark"] .icon-sun {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+
+:root[data-theme="dark"] .icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--panel-soft);
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--sea-3);
+  color: var(--badge-text);
   width: fit-content;
+  transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 .hero h1 {
@@ -273,6 +419,7 @@ body {
   font-size: 1.05rem;
   max-width: 640px;
   color: var(--ink-soft);
+  transition: color 0.6s ease;
 }
 
 .meta {
@@ -289,6 +436,7 @@ body {
   display: grid;
   gap: 8px;
   font-weight: 600;
+  transition: background-color 0.6s ease, border-color 0.6s ease;
 }
 
 .meta-label {
@@ -296,6 +444,7 @@ body {
   letter-spacing: 0.12em;
   font-size: 0.7rem;
   color: var(--label);
+  transition: color 0.6s ease;
 }
 
 .meta-card strong {
@@ -308,6 +457,11 @@ body {
   color: var(--status-text);
 }
 
+:root[data-theme="dark"] .meta-card.highlight {
+  background: linear-gradient(135deg, rgba(24, 34, 50, 0.8), rgba(32, 44, 62, 0.9));
+  border-color: rgba(255, 214, 163, 0.15);
+}
+
 .countdown-card {
   background: var(--card);
   border-radius: 28px;
@@ -316,6 +470,7 @@ body {
   backdrop-filter: blur(12px);
   display: grid;
   gap: 22px;
+  transition: background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .countdown-grid {
@@ -325,12 +480,12 @@ body {
 }
 
 .unit {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65));
+  background: linear-gradient(160deg, var(--unit-1), var(--unit-2));
   border-radius: 20px;
   padding: 18px;
   text-align: center;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: inset 0 0 0 1px var(--unit-border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.6s ease;
 }
 
 .unit:hover {
@@ -344,6 +499,7 @@ body {
   font-weight: 700;
   font-family: var(--countdown-font);
   color: var(--ink);
+  transition: color 0.6s ease;
 }
 
 .label {
@@ -352,6 +508,7 @@ body {
   font-size: 0.75rem;
   color: var(--ink-muted);
   font-weight: 600;
+  transition: color 0.6s ease;
 }
 
 .progress {
@@ -362,8 +519,9 @@ body {
 .progress-bar {
   height: 14px;
   border-radius: 999px;
-  background: rgba(16, 35, 49, 0.08);
+  background: var(--progress-track);
   overflow: hidden;
+  transition: background-color 0.6s ease;
 }
 
 .progress-bar span {
@@ -383,6 +541,7 @@ body {
   font-size: 0.95rem;
   font-weight: 500;
   color: var(--ink-soft);
+  transition: color 0.6s ease;
 }
 
 .status {
@@ -391,6 +550,7 @@ body {
   background: var(--status-bg);
   padding: 12px 16px;
   border-radius: 14px;
+  transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 .note {
@@ -400,6 +560,7 @@ body {
   box-shadow: var(--shadow);
   font-size: 0.95rem;
   color: var(--ink-soft);
+  transition: background-color 0.6s ease, color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .flag-line {
@@ -444,7 +605,7 @@ body {
 .wave-3 {
   bottom: 60px;
   opacity: 0.45;
-  background: linear-gradient(90deg, #1f8da2, #16697a);
+  background: linear-gradient(90deg, var(--sea-1), var(--sea-3));
   animation-delay: -6s;
 }
 
@@ -504,6 +665,8 @@ body {
 @media (max-width: 720px) {
   body {
     padding: 20px 14px 28px;
+    justify-content: flex-start;
+    align-items: stretch;
   }
 
   .hero,
@@ -522,7 +685,7 @@ body {
   }
 }
 
-@media (min-width: 721px) {
+@media (min-width: 721px) and (min-height: 801px) {
   body {
     height: 100vh;
     overflow-y: hidden;
