@@ -71,6 +71,15 @@
                 </svg>
               </span>
             </button>
+            <button
+              class="breaks-toggle"
+              id="breaksToggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="breaksPanel"
+            >
+              További szünetek
+            </button>
           </div>
         </div>
         <h1 id="headline">Nyári szünet visszaszámláló</h1>
@@ -90,8 +99,22 @@
         </div>
       </section>
 
+      <section class="breaks-panel" id="breaksPanel" hidden>
+        <h2 id="breaksTitle">További tanítási szünetek</h2>
+        <ul class="breaks-list" id="breaksList"></ul>
+        <div class="breaks-countdowns" id="breaksCountdowns"></div>
+      </section>
+
       <section class="countdown-card">
-        <div class="countdown-grid" aria-live="polite">
+        <div class="motivation-grid">
+          <article class="motivation-card motivation-card-wide">
+            <span class="motivation-label" id="survivedLabel">Teljesített tanítási napok</span>
+            <strong class="motivation-value" id="survivedDays">-- / --</strong>
+            <span class="motivation-sub" id="remainingTeachingDays">Hátra: -- tanítási nap</span>
+          </article>
+        </div>
+
+        <div class="countdown-grid" aria-hidden="true">
           <div class="unit">
             <span class="value" id="days">0</span>
             <span class="label" id="daysLabel">nap</span>
@@ -109,6 +132,7 @@
             <span class="label" id="secondsLabel">másodperc</span>
           </div>
         </div>
+        <p class="sr-only" id="countdownA11y" aria-live="polite" aria-atomic="true"></p>
 
         <div class="progress">
           <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
