@@ -65,6 +65,7 @@ const elements = {
   secondsLabel: document.getElementById("secondsLabel"),
   progressFill: document.getElementById("progressFill"),
   progressText: document.getElementById("progressText"),
+  summerWeekdayCounter: document.getElementById("summerWeekdayCounter"),
   progressBar: document.querySelector(".progress-bar"),
   budapestClock: document.getElementById("budapestClock"),
   lastTeachingDay: document.getElementById("lastTeachingDay"),
@@ -96,6 +97,7 @@ const lastValues = {
 
 let breakCountdownNodes = [];
 let lastAccessibleCountdown = "";
+let renderedBreakDateKey = "";
 
 const translations = {
   hu: {
@@ -116,14 +118,23 @@ const translations = {
     survivedDaysValue: "{completed} / {total} nap kész",
     remainingTeachingDays: "Hátra: {remaining} tanítási nap",
     progressLabel: "Tanév haladása: {percent}%",
+    summerWeekdayCounter: "Nyárig: {weekdays} hétköznap · {weekendDays} hétvégi nap",
     budapestTimeLabel: "Budapest idő: {time}",
     statusDefault: "Minden nap közelebb a nyárhoz.",
     statusDone: "Itt a nyár! Jó pihenést!",
     weekendWish: "Kellemes hétvégét!",
     otherBreaksButton: "További szünetek",
     otherBreaksTitle: "További tanítási szünetek",
+    nextBreakEyebrow: "Következő szünet",
     breakCountdownTitle: "{break} visszaszámláló",
     breakDaysLeftLine: "Hétköznapok hátra: {weekdays} · Hétvégi napok hátra: {weekendDays}",
+    noMoreBreaksTitle: "Már nincs több tanítási szünet a nyárig",
+    noMoreBreaksText: "Mostantól a nyári szünet visszaszámlálója viszi a főszerepet.",
+    breakStatusLabels: {
+      past: "Lezárult",
+      current: "Most tart",
+      upcoming: "Következik",
+    },
     otherBreakLabels: {
       autumn: "Őszi szünet",
       winter: "Téli szünet",
@@ -165,14 +176,23 @@ const translations = {
     survivedDaysValue: "{completed} / {total} days done",
     remainingTeachingDays: "{remaining} teaching days left",
     progressLabel: "School year progress: {percent}%",
+    summerWeekdayCounter: "Until summer: {weekdays} weekdays · {weekendDays} weekend days",
     budapestTimeLabel: "Budapest time: {time}",
     statusDefault: "Every day closer to summer.",
     statusDone: "Summer is here! Enjoy your break!",
     weekendWish: "Have a great weekend!",
     otherBreaksButton: "Other breaks",
     otherBreaksTitle: "Other school breaks",
+    nextBreakEyebrow: "Next break",
     breakCountdownTitle: "{break} countdown",
     breakDaysLeftLine: "Weekdays left: {weekdays} · Weekend days left: {weekendDays}",
+    noMoreBreaksTitle: "No more school breaks before summer",
+    noMoreBreaksText: "The summer countdown is the main milestone now.",
+    breakStatusLabels: {
+      past: "Past",
+      current: "In progress",
+      upcoming: "Upcoming",
+    },
     otherBreakLabels: {
       autumn: "Autumn break",
       winter: "Winter break",
@@ -285,13 +305,13 @@ function formatNumber(value) {
   return new Intl.NumberFormat(translations[currentLanguage].locale).format(value);
 }
 
-function getDateKeyForZone(zone) {
+function getDateKeyForZone(zone, date = new Date()) {
   const parts = getFormatter("en-GB", {
     timeZone: zone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(new Date());
+  }).formatToParts(date);
   const values = {};
   for (const part of parts) {
     if (part.type !== "literal") {
@@ -347,8 +367,8 @@ function isWeekendDate(parts, zone) {
   return weekday === "Sat" || weekday === "Sun";
 }
 
-function countWeekdayWeekendUntil(targetParts) {
-  const todayParts = getDatePartsForZone(new Date(), timeZone);
+function countWeekdayWeekendUntil(targetParts, now = new Date()) {
+  const todayParts = getDatePartsForZone(now, timeZone);
   if (compareParts(todayParts, targetParts) >= 0) {
     return { weekdays: 0, weekendDays: 0 };
   }
@@ -386,6 +406,38 @@ const breakRanges = otherBreaks.map((breakItem) => ({
   start: getLocalDateParts(breakItem.start),
   end: getLocalDateParts(breakItem.end),
 }));
+
+function getBreakParts(breakItem) {
+  return {
+    start: getLocalDateParts(breakItem.start),
+    end: getLocalDateParts(breakItem.end),
+  };
+}
+
+function getBreakStatus(breakItem, now = new Date()) {
+  const todayParts = getDatePartsForZone(now, timeZone);
+  const { start, end } = getBreakParts(breakItem);
+
+  if (compareParts(todayParts, start) < 0) return "upcoming";
+  if (compareParts(todayParts, end) > 0) return "past";
+  return "current";
+}
+
+function getNextUpcomingBreak(now = new Date()) {
+  return (
+    otherBreaks
+      .filter((breakItem) => getBreakStatus(breakItem, now) === "upcoming")
+      .sort(
+        (a, b) =>
+          partsToUtcMs(getBreakParts(a).start) - partsToUtcMs(getBreakParts(b).start)
+      )[0] ??
+    null
+  );
+}
+
+function areAllBreaksPast(now = new Date()) {
+  return otherBreaks.every((breakItem) => getBreakStatus(breakItem, now) === "past");
+}
 
 function isInSchoolBreak(parts) {
   return breakRanges.some((range) => isDateWithinRange(parts, range.start, range.end));
@@ -575,6 +627,7 @@ function runIntroAnimations() {
 
 const targetMs = zonedTimeToUtcMs(summerBreakStart, timeZone);
 const startMs = zonedTimeToUtcMs(schoolYearStart, timeZone);
+const summerBreakStartParts = getLocalDateParts(summerBreakStart);
 
 function updateDateTexts() {
   const lastTeachingDayText = formatDateTime(lastTeachingDay, {
@@ -597,14 +650,27 @@ function updateDateTexts() {
   elements.summerBreakStart.textContent = `${summerBreakStartText} (Budapest)`;
 }
 
-function renderOtherBreaksList() {
+function updateSummerWeekdayCounter(t, now = new Date()) {
+  if (!elements.summerWeekdayCounter) return;
+  const { weekdays, weekendDays } = countWeekdayWeekendUntil(summerBreakStartParts, now);
+  elements.summerWeekdayCounter.textContent = formatTemplate(t.summerWeekdayCounter, {
+    weekdays: formatNumber(weekdays),
+    weekendDays: formatNumber(weekendDays),
+  });
+}
+
+function renderOtherBreaksList(now = new Date()) {
   if (!elements.breaksList) return;
   const t = translations[currentLanguage];
-  elements.breaksList.innerHTML = "";
+  const items = otherBreaks.map((breakItem) => {
+    const status = getBreakStatus(breakItem, now);
 
-  otherBreaks.forEach((breakItem) => {
     const item = document.createElement("li");
-    item.className = "break-item";
+    item.className = `break-item break-item-${status}`;
+    item.dataset.status = status;
+
+    const copy = document.createElement("div");
+    copy.className = "break-copy";
 
     const name = document.createElement("span");
     name.className = "break-name";
@@ -624,83 +690,120 @@ function renderOtherBreaksList() {
     });
     dates.textContent = `${startText} – ${endText}`;
 
-    item.append(name, dates);
-    elements.breaksList.append(item);
+    const statusPill = document.createElement("span");
+    statusPill.className = `break-status break-status-${status}`;
+    statusPill.textContent = t.breakStatusLabels?.[status] ?? status;
+
+    copy.append(name, dates);
+    item.append(copy, statusPill);
+    item.setAttribute(
+      "aria-label",
+      `${name.textContent}: ${dates.textContent}, ${statusPill.textContent}`
+    );
+    return item;
   });
+
+  elements.breaksList.replaceChildren(...items);
 }
 
-function renderBreakCountdowns() {
+function renderBreakCountdowns(now = new Date()) {
   if (!elements.breaksCountdowns) return;
   const t = translations[currentLanguage];
-  elements.breaksCountdowns.innerHTML = "";
+  elements.breaksCountdowns.replaceChildren();
   breakCountdownNodes = [];
 
-  otherBreaks.forEach((breakItem) => {
-    const section = document.createElement("section");
-    section.className = "countdown-card break-countdown";
-    section.dataset.breakId = breakItem.id;
+  const breakItem = getNextUpcomingBreak(now);
+  if (!breakItem) {
+    if (areAllBreaksPast(now)) {
+      const empty = document.createElement("div");
+      empty.className = "breaks-empty";
 
-    const title = document.createElement("h3");
-    title.className = "break-countdown-title";
-    const breakName = t.otherBreakLabels?.[breakItem.id] ?? breakItem.id;
-    title.textContent = formatTemplate(t.breakCountdownTitle, { break: breakName });
+      const title = document.createElement("strong");
+      title.textContent = t.noMoreBreaksTitle;
 
-    const grid = document.createElement("div");
-    grid.className = "countdown-grid";
+      const copy = document.createElement("span");
+      copy.textContent = t.noMoreBreaksText;
 
-    const unitDefs = [
-      { key: "days", label: t.daysLabel },
-      { key: "hours", label: t.hoursLabel },
-      { key: "minutes", label: t.minutesLabel },
-      { key: "seconds", label: t.secondsLabel },
-    ];
+      empty.append(title, copy);
+      elements.breaksCountdowns.append(empty);
+    }
+    return;
+  }
 
-    const unitElements = {};
-    unitDefs.forEach((unit) => {
-      const unitWrap = document.createElement("div");
-      unitWrap.className = "unit";
+  const section = document.createElement("section");
+  section.className = "countdown-card break-countdown";
+  section.dataset.breakId = breakItem.id;
 
-      const value = document.createElement("span");
-      value.className = "value";
-      value.textContent = unit.key === "days" ? "0" : "00";
+  const eyebrow = document.createElement("span");
+  eyebrow.className = "break-countdown-eyebrow";
+  eyebrow.textContent = t.nextBreakEyebrow;
 
-      const label = document.createElement("span");
-      label.className = "label";
-      label.textContent = unit.label;
+  const title = document.createElement("h3");
+  title.className = "break-countdown-title";
+  const breakName = t.otherBreakLabels?.[breakItem.id] ?? breakItem.id;
+  title.textContent = formatTemplate(t.breakCountdownTitle, { break: breakName });
 
-      unitWrap.append(value, label);
-      grid.append(unitWrap);
-      unitElements[unit.key] = value;
-    });
+  const grid = document.createElement("div");
+  grid.className = "countdown-grid";
 
-    const meta = document.createElement("div");
-    meta.className = "break-count-meta";
-    meta.textContent = formatTemplate(t.breakDaysLeftLine, {
-      weekdays: "0",
-      weekendDays: "0",
-    });
+  const unitDefs = [
+    { key: "days", label: t.daysLabel },
+    { key: "hours", label: t.hoursLabel },
+    { key: "minutes", label: t.minutesLabel },
+    { key: "seconds", label: t.secondsLabel },
+  ];
 
-    section.append(title, grid, meta);
-    elements.breaksCountdowns.append(section);
-    breakCountdownNodes.push({
-      id: breakItem.id,
-      start: breakItem.start,
-      elements: unitElements,
-      title,
-      meta,
-      targetParts: {
-        year: breakItem.start.year,
-        month: breakItem.start.month,
-        day: breakItem.start.day,
-      },
-    });
+  const unitElements = {};
+  unitDefs.forEach((unit) => {
+    const unitWrap = document.createElement("div");
+    unitWrap.className = "unit";
+
+    const value = document.createElement("span");
+    value.className = "value";
+    value.textContent = unit.key === "days" ? "0" : "00";
+
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = unit.label;
+
+    unitWrap.append(value, label);
+    grid.append(unitWrap);
+    unitElements[unit.key] = value;
+  });
+
+  const meta = document.createElement("div");
+  meta.className = "break-count-meta";
+  meta.textContent = formatTemplate(t.breakDaysLeftLine, {
+    weekdays: "0",
+    weekendDays: "0",
+  });
+
+  section.append(eyebrow, title, grid, meta);
+  elements.breaksCountdowns.append(section);
+  breakCountdownNodes.push({
+    id: breakItem.id,
+    start: breakItem.start,
+    elements: unitElements,
+    title,
+    meta,
+    targetParts: {
+      year: breakItem.start.year,
+      month: breakItem.start.month,
+      day: breakItem.start.day,
+    },
   });
 }
 
-function updateBreakCountdowns() {
+function renderBreaks(now = new Date()) {
+  renderedBreakDateKey = getDateKeyForZone(timeZone, now);
+  renderOtherBreaksList(now);
+  renderBreakCountdowns(now);
+}
+
+function updateBreakCountdowns(now = new Date()) {
   if (!breakCountdownNodes.length) return;
   const t = translations[currentLanguage];
-  const nowMs = Date.now();
+  const nowMs = now.getTime();
 
   breakCountdownNodes.forEach((breakItem) => {
     const targetMs = zonedTimeToUtcMs(breakItem.start, timeZone);
@@ -726,7 +829,7 @@ function updateBreakCountdowns() {
     });
 
     if (breakItem.meta) {
-      const { weekdays, weekendDays } = countWeekdayWeekendUntil(breakItem.targetParts);
+      const { weekdays, weekendDays } = countWeekdayWeekendUntil(breakItem.targetParts, now);
       breakItem.meta.textContent = formatTemplate(t.breakDaysLeftLine, {
         weekdays: String(weekdays),
         weekendDays: String(weekendDays),
@@ -759,12 +862,13 @@ function setLanguage(lang, persist = true) {
   if (elements.breaksTitle) elements.breaksTitle.textContent = t.otherBreaksTitle;
 
   elements.languageButtons.forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.lang === lang);
+    const isActive = button.dataset.lang === lang;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
   updateDateTexts();
-  renderOtherBreaksList();
-  renderBreakCountdowns();
+  renderBreaks();
   updateCountdown();
   updateThemeToggleLabel();
 
@@ -777,8 +881,12 @@ function setLanguage(lang, persist = true) {
 
 function updateCountdown() {
   const t = translations[currentLanguage];
-  updateBreakCountdowns();
   const now = new Date();
+  const todayKey = getDateKeyForZone(timeZone, now);
+  if (todayKey !== renderedBreakDateKey) {
+    renderBreaks(now);
+  }
+  updateBreakCountdowns(now);
   const nowMs = now.getTime();
   const diffMs = targetMs - nowMs;
 
@@ -795,6 +903,7 @@ function updateCountdown() {
   }
 
   updateMotivationStats(t, now);
+  updateSummerWeekdayCounter(t, now);
 
   if (diffMs <= 0) {
     elements.days.textContent = "0";
