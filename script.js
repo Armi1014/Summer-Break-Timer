@@ -1,7 +1,7 @@
 const timeZone = "Europe/Budapest";
 
 const schoolYearStart = {
-  year: 2025,
+  year: 2026,
   month: 9,
   day: 1,
   hour: 0,
@@ -10,18 +10,18 @@ const schoolYearStart = {
 };
 
 const lastTeachingDay = {
-  year: 2026,
+  year: 2027,
   month: 6,
-  day: 19,
+  day: 18,
   hour: 0,
   minute: 0,
   second: 0,
 };
 
 const summerBreakStart = {
-  year: 2026,
+  year: 2027,
   month: 6,
-  day: 20,
+  day: 19,
   hour: 0,
   minute: 0,
   second: 0,
@@ -30,18 +30,18 @@ const summerBreakStart = {
 const otherBreaks = [
   {
     id: "autumn",
-    start: { year: 2025, month: 10, day: 23 },
-    end: { year: 2025, month: 11, day: 2 },
+    start: { year: 2026, month: 10, day: 23 },
+    end: { year: 2026, month: 11, day: 1 },
   },
   {
     id: "winter",
-    start: { year: 2025, month: 12, day: 20 },
-    end: { year: 2026, month: 1, day: 4 },
+    start: { year: 2026, month: 12, day: 19 },
+    end: { year: 2027, month: 1, day: 3 },
   },
   {
     id: "spring",
-    start: { year: 2026, month: 4, day: 2 },
-    end: { year: 2026, month: 4, day: 12 },
+    start: { year: 2027, month: 3, day: 25 },
+    end: { year: 2027, month: 4, day: 4 },
   },
 ];
 
@@ -104,7 +104,7 @@ const translations = {
     locale: "hu-HU",
     htmlLang: "hu",
     pageTitle: "Nyári szünet visszaszámláló",
-    badge: "Magyar tanév 2025/2026",
+    badge: "Magyar tanév 2026/2027",
     headline: "Nyári szünet visszaszámláló",
     intro:
       "Színes, pontos és Budapest-időre hangolt visszaszámlálás a magyar iskolák nyári szünetéig.",
@@ -156,13 +156,13 @@ const translations = {
     themeToggleDark: "Sötét mód bekapcsolása",
     themeToggleLight: "Világos mód bekapcsolása",
     note:
-      "Az időpontok a 2025/2026-os tanév hivatalos rendje alapján vannak beállítva. A visszaszámlálás a budapesti időzónát használja. Forrás: 27/2025. (VII. 24.) BM rendelet.",
+      "Az időpontok a 2026/2027-es tanév hivatalos rendje alapján vannak beállítva. A visszaszámlálás a budapesti időzónát használja. Forrás: 1/2026. (VII. 31.) OGYM rendelet.",
   },
   en: {
     locale: "en-US",
     htmlLang: "en-US",
     pageTitle: "Summer break countdown",
-    badge: "Hungarian school year 2025/2026",
+    badge: "Hungarian school year 2026/2027",
     headline: "Summer break countdown",
     intro:
       "A colorful, accurate countdown to the Hungarian school summer break, aligned to Budapest time.",
@@ -215,7 +215,7 @@ const translations = {
     themeToggleDark: "Switch to dark mode",
     themeToggleLight: "Switch to light mode",
     note:
-      "Dates follow the official 2025/2026 Hungarian school year schedule. The countdown uses the Budapest time zone. Source: 27/2025. (VII. 24.) BM decree.",
+      "Dates follow the official 2026/2027 Hungarian school year schedule. The countdown uses the Budapest time zone. Source: OGYM Decree 1/2026 (VII. 31.).",
   },
 };
 
